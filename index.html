@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+.game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.game-board {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  background-color: #ccc;
+}
+
+.snake {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  width: 10px;
+  height: 10px;
+  background-color: #f00;
+}
+
+.food {
+  position: absolute;
+  width: 10px;
+  left: 20px;
+  height: 10px;
+  background-color: #0f0;
+}
+
+.game-info {
+  margin-top: 20px;
+  font-size: 20px;
+  color: #fff;
+}
+
+#start-button {
+  font-size: 20px;
+  padding: 10px 20px;
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+}
+
+#start-button:hover {
+  background-color: #c00;
+}
+</style>
+<body>
+    <div class="game-container">
+        <div class="game-board">
+          <div class="snake"></div>
+          <div class="food"></div>
+        </div>
+        <div class="game-info">
+          <p>Score: <span id="score">0</span></p>
+          <button id="start-button">Start Game</button>
+        </div>
+      </div>
+      <script>
+  // Game constants
+const BOARD_WIDTH = 300;
+const BOARD_HEIGHT = 300;
+const SNAKE_SIZE = 10;
+const SNAKE_SPEED = 10;
+const FOOD_SIZE = 10;
+const SCORE_INCREMENT = 10;
+
+// Game variables
+let snake;
+let food;
+let score;
+let direction;
+let gameLoopId;
+
+// Game elements
+const gameBoard = document.querySelector('.game-board');
+const snakeElement = document.querySelector('.snake');
+const foodElement = document.querySelector('.food');
+const scoreDisplay = document.querySelector('#score');
+const startButton = document.querySelector('#start-button');
+
+// Start the game
+startButton.addEventListener('click', startGame);
+
+function startGame() {
+  // Reset game variables
+  snake = [{ x: 0, y: 0 }];
+  food = null;
+  score = 0;
+  direction = 'right';
+
+
+
+
+  // Set up snake element
+  snakeElement.style.width = SNAKE_SIZE + 'px';
+  snakeElement.style.height = SNAKE_SIZE + 'px';
+
+  // Set up game loop
+  gameLoopId = setInterval(() => {
+    // Move snake
+    let head = { x: snake[0].x, y: snake[0].y };
+    switch (direction) {
+      case 'up':
+        head.y -= SNAKE_SPEED;
+        break;
+      case 'down':
+        head.y += SNAKE_SPEED;
+        break;
+      case 'left':
+        head.x -= SNAKE_SPEED;
+        break;
+      case 'right':
+        head.x += SNAKE_SPEED;
+        break;
+    }
+    snake.unshift(head);
+
+    // Check for collision with wall
+    if (head.x < 0 || head.x >= BOARD_WIDTH || head.y < 0 || head.y >= BOARD_HEIGHT) {
+      endGame();
+      return;
+    }
+
+    // Check for collision with food
+    if (food && head.x === food.x && head.y === food.y) {
+      score += SCORE_INCREMENT;
+      scoreDisplay.textContent = score;
+      food = null;
+      snake.textContent =snake;
+    } else {
+      snake.pop();
+    }
+
+    // Draw snake
+    snakeElement.style.left = snake[0].x + 'px';
+    snakeElement.style.bottom = snake[0].y + 'px';
+
+    // Draw food
+    if (!food) {
+      let x = Math.floor(Math.random() * (BOARD_WIDTH / FOOD_SIZE)) * FOOD_SIZE;
+      let y = Math.floor(Math.random() * (BOARD_HEIGHT / FOOD_SIZE)) * FOOD_SIZE;
+      food = { x: x, y: y };
+      foodElement.style.left = x + 'px';
+      foodElement.style.bottom = y + 'px';
+    }
+  }, 100);
+
+  // Enable controls
+  document.addEventListener('keydown', handleKeyDown);
+
+  // Disable start button
+  startButton.disabled = true;
+}
+
+// Handle keyboard input
+function handleKeyDown(event) {
+  switch (event.code) {
+    case 'ArrowUp':
+      if (direction !== 'down') {
+        direction = 'down';
+      }
+      break;
+    case 'ArrowDown':
+      if (direction !== 'up') {
+        direction = 'up';
+      }
+      break;
+    case 'ArrowLeft':
+      if (direction !== 'right') {
+        direction = 'left';
+      }
+      break;
+    case 'ArrowRight':
+      if (direction !== 'left') {
+        direction = 'right';
+      }
+      break;
+  }
+}
+
+// End the game and stop the game loop
+function endGame() {
+  clearInterval(gameLoopId);
+  alert(`Game over! Your score is ${score}.`);
+  document.removeEventListener('keydown', handleKeyDown);
+  startButton.disabled = false;
+}
+      </script>
+</body>
+</html>
